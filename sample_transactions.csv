@@ -1,0 +1,6 @@
+date,description,amount,type,merchant
+2025-01-02,Starbucks,-5.45,debit,Starbucks
+2025-01-03,Payroll,2500,credit,Employer Inc
+2025-01-04,Amazon,-120.99,debit,Amazon
+2025-01-05,ATM Withdrawal,-200,debit,ATM
+2025-01-06,Wire Transfer,-1500,debit,Unknown
