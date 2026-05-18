@@ -4,21 +4,51 @@ import os
 
 # Load environment variables from .env file
 load_dotenv()
-hf_api_token = os.getenv('HUGGINGFACEHUB_API_TOKEN')
-hf_chat_model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+
+DEFAULT_MODEL = os.getenv(
+    "MODEL_ID",
+    "meta-llama/Meta-Llama-3-70B-Instruct"
+)
+
 
 def get_client():
-    # Replace with your HF token
-    return InferenceClient(
-        model=hf_chat_model_id,
-        token= hf_api_token 
-    )
 
-def ask_llm(client, prompt):
-    response = client.text_generation(
-        prompt,
-        max_new_tokens=300,
-        temperature=0.3,
-        top_p=0.9
-    )
-    return response
+    token = os.getenv("HF_TOKEN")
+    if not token:
+        raise ValueError(
+            "HF_TOKEN not found. Add it to your .env file or environment variables."
+        )
+    return InferenceClient(api_key=token)
+
+def ask_llm(client, prompt, model=DEFAULT_MODEL):
+    """
+    Send the prompt to the LLM using the chat completion API.
+    Returns plain text.
+    """
+    try:
+        response = client.chat_completion(
+            model=model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a fraud detection assistant. "
+                        "Analyze the transaction and return:\n"
+                        "Fraud Risk: LOW, MEDIUM, or HIGH\n"
+                        "Reason: concise explanation"
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ],
+            max_tokens=200,
+            temperature=0.2,
+            top_p=0.9,
+        )
+
+        return response.choices[0].message.content.strip()
+
+    except Exception as e:
+        return f"LLM Error: {str(e)}"
